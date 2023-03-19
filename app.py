@@ -24,7 +24,7 @@ REDIRECT_URI = "http://127.0.0.1:5000/callback/"
 # 3. This redirects to the callback url, which is in the UI.
 # Grabs query param (code, state?, scope?), makes post to backend,
 # which returns access token and refresh token.
-# 4. User can use theses to access frame.io stuff.
+# 4. User can use these to access frame.io stuff.
 
 
 @app.route('/')
