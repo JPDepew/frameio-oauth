@@ -35,7 +35,7 @@ def hello():
 
 
 @app.route('/callback/')
-def about():
+def callback():
     state = request.args.get('state')
     scope = request.args.get('scope')
     code = request.args.get('code')
