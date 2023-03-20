@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "oauth-test"
+name = "frameio-oauth"
 version = "0.1.0"
 description = ""
 authors = ["JPDepew <johnpaul.depew@geckorobotics.com>"]
