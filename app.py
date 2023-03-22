@@ -1,6 +1,7 @@
+import json
 from urllib.parse import urlencode
 import uuid
-from flask import Flask, redirect, request
+from flask import Flask, redirect, render_template, request
 import requests
 
 app = Flask(__name__)
@@ -32,7 +33,7 @@ REFRESH_TOKEN = ""
 
 @app.route('/')
 @app.route('/login/')
-def hello():
+def index():
     auth_url = create_auth_url()
     return redirect(auth_url)
 
@@ -64,12 +65,19 @@ def callback():
     # If using PKCE, use the below request with no auth
     resp = requests.post(TOKEN_URL, data=post_data)
     response_data = resp.json()
+    print(response_data)
     global TOKEN
     global REFRESH_TOKEN
-    TOKEN = response_data["token"]
-    REFRESH_TOKEN = response_data["token"]
+    TOKEN = response_data["access_token"]
+    REFRESH_TOKEN = response_data["refresh_token"]
     # This is the data needed to access frame.io
-    return "hi"
+    return render_template("home.html")
+
+
+@app.route('/projects/')
+def get_projects():
+    blah = json.dumps({"blah": "blah"})
+    return blah
 
 
 def create_auth_url():
