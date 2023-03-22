@@ -2,12 +2,12 @@
 name = "frameio-oauth"
 version = "0.1.0"
 description = ""
-authors = ["JPDepew <johnpaul.depew@geckorobotics.com>"]
+authors = ["JPDepew <jpdepewjp@gmail.co>"]
 readme = "README.md"
-packages = [{include = "oauth_test"}]
+packages = [{include = "frameio_oauth"}]
 
 [tool.poetry.dependencies]
-python = "3.9.1"
+python = "^3.9"
 flask = "^2.2.3"
 requests = "^2.28.2"
 

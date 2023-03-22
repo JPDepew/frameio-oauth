@@ -17,6 +17,9 @@ SCOPE = (
 # The callback URI for your app
 REDIRECT_URI = "http://127.0.0.1:5000/callback/"
 
+TOKEN = ""
+REFRESH_TOKEN = ""
+
 
 # Steps
 # 1. User goes to the login url, which redirects to the auth url
@@ -59,9 +62,14 @@ def callback():
     # Frame.io
 
     # If using PKCE, use the below request with no auth
-    response = requests.post(TOKEN_URL, data=post_data) 
+    resp = requests.post(TOKEN_URL, data=post_data)
+    response_data = resp.json()
+    global TOKEN
+    global REFRESH_TOKEN
+    TOKEN = response_data["token"]
+    REFRESH_TOKEN = response_data["token"]
     # This is the data needed to access frame.io
-    return response.text
+    return "hi"
 
 
 def create_auth_url():
