@@ -1,8 +1,10 @@
 import json
+import math
 from urllib.parse import urlencode
 import uuid
 from flask import Flask, redirect, render_template, request
 import requests
+from frameioclient import FrameioClient
 
 app = Flask(__name__)
 
@@ -71,13 +73,59 @@ def callback():
     TOKEN = response_data["access_token"]
     REFRESH_TOKEN = response_data["refresh_token"]
     # This is the data needed to access frame.io
-    return render_template("home.html")
+    return render_template("home.html", token=TOKEN)
 
 
 @app.route('/projects/')
 def get_projects():
-    blah = json.dumps({"blah": "blah"})
-    return blah
+    token = request.args.get("token")
+    resp = make_frameio_request("accounts", token=token)
+    account_id = resp.json()[0]["id"]
+    resp = make_frameio_request(f"accounts/{account_id}/teams", token=token)
+    team_id = resp.json()[0]["id"]
+    resp = make_frameio_request(f"teams/{team_id}/projects", token=token)
+    root_asset_id = resp.json()[0]["root_asset_id"]
+    resp = make_frameio_request(f"assets/{root_asset_id}/children?type=folder", token=token)
+
+    folder_names = []
+    for folder in resp.json():
+        folder_id = folder["id"]
+        resp = make_frameio_request(f"assets/{folder_id}/children?type=folder", token=token)
+        folder_names.append({"name": folder["name"], "id": folder_id})
+
+    return folder_names
+
+
+@app.route("/upload_video/", methods=["POST"])
+def upload_video():
+    folder_id = "89fd3673-4fee-4e22-8c60-957967e23b06"
+    token = request.args.get("token")
+    data = request.files
+    file = data["video"]
+    filesize = len(file.read())
+    client = FrameioClient(token)
+    asset = client.assets.create(
+        parent_asset_id=folder_id,
+        name=file.filename,
+        type="file",
+        filetype="video/quicktime",
+        filesize=filesize,
+    )
+
+    chunk_size = math.ceil(float(filesize) / float(len(asset["upload_urls"])))
+    file.seek(0)
+    for url in asset["upload_urls"]:
+        chunk = file.read(chunk_size)
+        resp = requests.put(
+            url,
+            chunk,
+            headers={
+                "Content-Type": "video/quicktime",
+                "x-amz-acl": "private",
+            }
+        )
+        print(resp)
+    return {"message": "ok"}
 
 
 def create_auth_url():
@@ -89,7 +137,15 @@ def create_auth_url():
         'state': str(uuid.uuid4())
     }
     url = (AUTHORIZE_URL + "?" + urlencode(credentials))
-    print(url)
     return url
 
+
+def make_frameio_request(path: str, method: str = "GET", token=TOKEN, data=None) -> requests.Response:
+    headers = {"Authorization": f"Bearer {token}"}
+    return requests.request(
+        method,
+        f"https://api.frame.io/v2/{path}",
+        headers=headers,
+        data=data
+    )
 

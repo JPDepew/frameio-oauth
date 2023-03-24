@@ -10,6 +10,7 @@ packages = [{include = "frameio_oauth"}]
 python = "^3.9"
 flask = "^2.2.3"
 requests = "^2.28.2"
+frameioclient = "^1.1.0"
 
 
 [build-system]

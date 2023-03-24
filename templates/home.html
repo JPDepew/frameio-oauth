@@ -3,15 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>FlaskApp</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <h1>Hello World!</h1>
     <h2>Welcome to FlaskApp!</h2>
-    <button onclick="listProjects()">List project</button>
+    <div class="box">
+        <div class="item">
+            <button onclick="listProjects()">List project</button>
+            <div>Folders</div>
+            <div id="folder-names"></div>
+        </div>
+        <form enctype = "multipart/form-data" onsubmit="return false;" >
+            <input type="file" id="file-upload" name="filename" />
+            <button id="upload-button" onclick="uploadVideo()">Submit</button>
+        </form>
+    </div>
 </body>
+<style>
+    .box {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+    .item {
+        width: 50%;
+        padding: 100px;
+    }
+</style>
 <script>
     async function listProjects() {
-      await fetch("/projects/").then(async res => console.log(await res.json()))
+        await fetch("/projects/?token={{ token }}").then(
+            async res => {
+                const folders = await res.json();
+                const folderDiv = document.getElementById("folder-names")
+                folders.forEach(x => {
+                    const folderElement = document.createElement("div")
+                    folderElement.appendChild(document.createTextNode(x.name));
+                    folderDiv.appendChild(folderElement);
+                })
+            }
+        )   
+    }
+    async function uploadVideo() {
+        const fileUpload = document.getElementById("file-upload").files[0];
+        const formData = new FormData()
+        formData.append("video", fileUpload)
+
+        axios.post("/upload_video/?token={{ token }}", formData).then(result => {
+            console.log(result);
+            alert("upload complete xxx");
+        }).catch(err => {
+            console.log(err);
+            alert("upload error");
+        })
     }
 </script>
 </html>
